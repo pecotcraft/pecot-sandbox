@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+jobs:
+  ci-result:
+    name: ci-result
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
+
+  version-plan:
+    name: version-plan
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
