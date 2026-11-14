@@ -1,0 +1,56 @@
+{
+  "host": "github.com",
+  "owner": "pecotcraft",
+  "workflow_suffix": "sandbox",
+  "project": {
+    "number": 3,
+    "id": "PVT_kwDOFO6i_s4BrU_h",
+    "board_url": "https://github.com/orgs/pecotcraft/projects/3/views/1?layout=board&verticalGroupedBy%5BcolumnId%5D=443036843&filterQuery=%20pecot-workflow-sandbox%3APending%2CBacklog%2CBlocked%2CReady%2CActive%2CArchived%2C%22In%20Review%22",
+    "fields": {
+      "workflow": {
+        "id": "PVTSSF_lADOFO6i_s4BrU_hzhpoNKs",
+        "options": {
+          "backlog": "a8036584",
+          "pending": "04e16347",
+          "blocked": "6844ea2c",
+          "ready": "876c632d",
+          "active": "3ad69a40",
+          "in_review": "9000f17f",
+          "archived": "c31b7e1c"
+        }
+      },
+      "priority": {
+        "id": "PVTSSF_lADOFO6i_s4BrU_hzhpoNMQ",
+        "options": {
+          "high": "e0e0f2a6",
+          "medium": "3b025323",
+          "low": "e26cd6f8"
+        }
+      },
+      "size": {
+        "id": "PVTSSF_lADOFO6i_s4BrU_hzhpoNNc",
+        "options": {
+          "xs": "ac70788f",
+          "s": "b55db0c5",
+          "m": "8d1c2dc4",
+          "l": "b1b2481c"
+        }
+      },
+      "status": {
+        "id": "PVTSSF_lADOFO6i_s4BrU_hzhpoNH8",
+        "options": {
+          "todo": "f75ad846",
+          "needs_attention": "3fd0034e"
+        }
+      }
+    }
+  },
+  "repositories": [
+    {
+      "owner": "pecotcraft",
+      "name": "pecot-sandbox",
+      "develop_branch": "main",
+      "release_branch": "main"
+    }
+  ]
+}
