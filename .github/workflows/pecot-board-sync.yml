@@ -92,4 +92,4 @@ jobs:
           (cd "$RUNNER_TEMP/pecot" && bash plugins/pecot-workflow/scripts/release/publish-mcp-dist.sh --dry-run --out-dir="$RUNNER_TEMP/pecot-dist")
           npm pack "$RUNNER_TEMP/pecot-dist" --pack-destination "$RUNNER_TEMP"
           tgz="$(ls "$RUNNER_TEMP"/pecot-workflow-mcp-*.tgz)"
-          npx -y --prefix=/ "$tgz" board sync
+          npx -y --prefix=/ --package="$tgz" pecot-workflow-mcp board sync
