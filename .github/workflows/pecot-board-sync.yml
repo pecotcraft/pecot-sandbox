@@ -78,18 +78,7 @@ jobs:
 
       # Pin the major version here. Raise it when the plugin's major version is raised.
       # --prefix=/ keeps npx from stopping in a repository that declares pnpm devEngines.
-      # Verification only (pecotcraft/pecot#413). Builds board sync from a pecot commit until npm has it.
       - name: Sync the board
         env:
           PECOT_GITHUB_COM_TOKEN: ${{ steps.app-token.outputs.token || secrets.PECOT_BOARD_SYNC_TOKEN }}
-          PECOT_SHA: b0c193404c495151aa167b53d3412cb053297ae2
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
-        run: |
-          git init -q "$RUNNER_TEMP/pecot"
-          git -C "$RUNNER_TEMP/pecot" remote add origin https://github.com/pecotcraft/pecot.git
-          git -C "$RUNNER_TEMP/pecot" fetch -q --depth 1 origin "$PECOT_SHA"
-          git -C "$RUNNER_TEMP/pecot" checkout -q FETCH_HEAD
-          (cd "$RUNNER_TEMP/pecot" && bash plugins/pecot-workflow/scripts/release/publish-mcp-dist.sh --dry-run --out-dir="$RUNNER_TEMP/pecot-dist")
-          npm pack "$RUNNER_TEMP/pecot-dist" --pack-destination "$RUNNER_TEMP"
-          tgz="$(ls "$RUNNER_TEMP"/pecot-workflow-mcp-*.tgz)"
-          npx -y --prefix=/ --package="$tgz" pecot-workflow-mcp board sync
+        run: npx -y --prefix=/ @pecot/workflow-mcp@6 board sync
