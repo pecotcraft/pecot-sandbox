@@ -1,1 +1,2 @@
 phase2 v1
+phase2 local v2
