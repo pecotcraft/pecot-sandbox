@@ -1,3 +1,4 @@
 line1 base
 line2 changed by C
 line3 base
+line4 added by C (near phase2 line2)
