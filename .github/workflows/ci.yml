@@ -16,7 +16,6 @@ jobs:
     name: ci-result
     runs-on: ubuntu-latest
     steps:
-      - run: sleep 240
       - run: echo ok
 
   version-plan:
