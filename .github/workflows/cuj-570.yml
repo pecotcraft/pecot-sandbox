@@ -1,0 +1,37 @@
+# pecotcraft/pecot#570 の CUJ 1。確かめた後に PR ごと閉じる
+name: cuj-570
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+jobs:
+  finish:
+    if: github.head_ref == 'cuj/570-review-finish-r2'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: pecotcraft/pecot
+          ref: feat/pr-review-finish-stopped-comment/570
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile --filter @pecot/pecot-workflow-cli...
+      - name: review finish（failure を 2 回と、雛形の食い違い）
+        env:
+          PECOT_GITHUB_COM_TOKEN: ${{ github.token }}
+          PR: ${{ github.repository }}/${{ github.event.pull_request.number }}
+          CONCLUSION: ""
+        working-directory: plugins/pecot-workflow/cli
+        run: |
+          for i in 1 2; do
+            echo "--- run $i"
+            pnpm exec tsx src/cli.ts review finish "$PR" --ensure --job-status failure --review-outcome failure --review-conclusion failure --review-has-token true --execution-file "" --since ""
+          done
+          echo "--- mismatch"
+          pnpm exec tsx src/cli.ts review finish "$PR" --ensure --job-status success --review-outcome success --review-conclusion "$CONCLUSION" --review-has-token false
