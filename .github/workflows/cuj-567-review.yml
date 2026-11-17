@@ -93,7 +93,20 @@ jobs:
           allowed_bots: ${{ join(fromJSON(vars.PECOT_REVIEW_ALLOWED_BOTS || '[]'), ',') }}
           show_full_output: true
           prompt: |
-            /pecot-w:w-help Issue pecotcraft/pecot-sandbox/281 の状態を issue_show で読み、着手できるかを 3 行で答えてください。読めなかったら、エラーの文をそのまま書いてください。
+            This is a verification run for pecotcraft/pecot#567, in ${{ github.repository }} PR #${{ github.event.pull_request.number }}. Do the steps below in order. Do not stop at a failure; record it and go on. Finally print a section titled PROBE RESULTS with one line per step: step id, tool, ok/denied/error, and the exact error text.
+            
+            P1. Call the Skill tool with skill "pecot-w:w-help" and args "pecot とは何かを 1 行で答えてください". Report whether the call was allowed, and the denial text verbatim if it was denied. Do not follow the skill further than one line of answer.
+            P2. Call mcp__plugin_pecot-w_pecot-workflow__issue_comment with issue_ref "${{ github.repository }}/${{ github.event.pull_request.number }}", template "review-findings", and message set to this multi-line text:
+            ## Findings — 確かめ用の指摘が 1 件ある
+            
+            ### General — 行に紐づかない指摘は無い
+            
+            - 非インライン指摘なし
+            
+            ### Disposition — 確かめ用なので直さない
+            
+            - **F-01** 確かめ用のインラインコメント — 対応不要（確かめ用） https://github.com/pecotcraft/pecot-sandbox/pull/280#discussion_r4596141435
+            Report the result (including any comment URL) or the validation error verbatim.
           claude_args: >-
             --permission-mode default
             --max-turns ${{ vars.PECOT_REVIEW_MAX_TURNS || 60 }}
