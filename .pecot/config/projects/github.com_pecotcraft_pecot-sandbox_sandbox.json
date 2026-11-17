@@ -12,7 +12,7 @@
         "options": {
           "backlog": "a8036584",
           "pending": "04e16347",
-          "blocked": "6844ea2c",
+          "blocked": "49f847c4",
           "ready": "876c632d",
           "active": "3ad69a40",
           "in_review": "9000f17f",
@@ -40,7 +40,7 @@
         "id": "PVTSSF_lADOFO6i_s4BrU_hzhpoNH8",
         "options": {
           "todo": "f75ad846",
-          "needs_attention": "3fd0034e"
+          "needs_attention": "47e0e8d9"
         }
       }
     }
