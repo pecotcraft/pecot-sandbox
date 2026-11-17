@@ -93,7 +93,7 @@ jobs:
           allowed_bots: ${{ join(fromJSON(vars.PECOT_REVIEW_ALLOWED_BOTS || '[]'), ',') }}
           show_full_output: true
           prompt: |
-            This is a turn-limit probe for pecotcraft/pecot#567. Do not use the Agent tool. Call one tool per turn: first Read probe/sample.py, then Glob "**/*.yml", then Read each file that Glob returned, one per turn. Finally summarize every file in one paragraph each.
+            This is a time-limit probe for pecotcraft/pecot#567. Start the subagent pecot-w:w-reviewer with the Agent tool ten times, one after another, never in parallel. Each time, ask it to review probe/sample.py from a different single viewpoint: correctness, edge cases, naming, documentation, types, performance, testability, error messages, readability, and API design. Wait for each to finish before starting the next. Finally summarize all ten results.
           claude_args: >-
             --permission-mode default
             --max-turns ${{ vars.PECOT_REVIEW_MAX_TURNS || 60 }}
