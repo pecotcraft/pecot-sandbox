@@ -1,0 +1,58 @@
+name: cuj-567 claude app review
+
+# Probe for #567: review with the official Claude GitHub App token (no github_token input).
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Activate project
+        run: echo github.com_pecotcraft_pecot-sandbox_sandbox.json > .pecot/config/projects/.active
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.22.1"
+
+      - name: Review
+        id: claude
+        uses: anthropics/claude-code-action@cc98b3ae241b0fcfb6a42a2690751afffecb4452 # v1.0.278
+        env:
+          PECOT_GITHUB_COM_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          plugin_marketplaces: https://github.com/pecotcraft/pecot.git
+          plugins: pecot-w@pecot
+          classify_inline_comments: "false"
+          show_full_output: true
+          prompt: |
+            /pecot-w:w-revise ${{ github.repository }}/${{ github.event.pull_request.number }}
+
+            This run has no human (pecotcraft/pecot#567 verification). Follow w-revise Step 1 to Step 3 only, with these changes:
+            - Post each inline finding with mcp__github_inline_comment__create_inline_comment (confirmed true) instead of gh api.
+            - Post review-findings with mcp__plugin_pecot-w_pecot-workflow__issue_comment, passing the body as message.
+            - Do not ask the user anything. Stop after Step 3.
+          claude_args: >-
+            --permission-mode default
+            --max-turns 60
+            --allowedTools "Read,Glob,Grep,Skill,Agent,mcp__plugin_pecot-w_pecot-workflow__pr_show,mcp__plugin_pecot-w_pecot-workflow__issue_show,mcp__plugin_pecot-w_pecot-workflow__pr_restack,mcp__plugin_pecot-w_pecot-workflow__issue_comment,mcp__github_inline_comment__create_inline_comment"
+            --disallowedTools "Bash,Edit,Write,NotebookEdit,AskUserQuestion,WebFetch,WebSearch"
