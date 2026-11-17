@@ -93,25 +93,7 @@ jobs:
           allowed_bots: ${{ join(fromJSON(vars.PECOT_REVIEW_ALLOWED_BOTS || '[]'), ',') }}
           show_full_output: true
           prompt: |
-            This is a verification run for pecotcraft/pecot#567, in ${{ github.repository }} PR #${{ github.event.pull_request.number }}. Do the steps below in order. Do not stop at a failure; record it and go on. Finally print a section titled PROBE RESULTS with one line per step: step id, tool, ok/denied/error, and the exact error text or the key fields asked for.
-            
-            P1. Call mcp__plugin_pecot-w_pecot-workflow__pr_show with pr_ref "${{ github.repository }}/${{ github.event.pull_request.number }}" and json true. Report success or the error, and the changed files.
-            P2. Call mcp__plugin_pecot-w_pecot-workflow__pr_show with the same pr_ref and reviews true. Report the number of review threads, and for each thread its id, path, line, isResolved, and the first 40 characters of its first comment.
-            P3. Call mcp__plugin_pecot-w_pecot-workflow__issue_show with issue_ref "${{ github.repository }}/${{ github.event.pull_request.number }}". Report success or the error.
-            P4. Call mcp__plugin_pecot-w_pecot-workflow__pr_restack with check true. Report the output or the error.
-            P5. Call mcp__plugin_pecot-w_pecot-workflow__issue_comment with issue_ref "${{ github.repository }}/${{ github.event.pull_request.number }}", template "review-findings", and message set to this multi-line text:
-            ## Findings — probe for #567
-            
-            ### General — no non-inline findings
-            
-            - 非インライン指摘なし
-            
-            ### Disposition — probe only
-            
-            - **F-01** probe inline comment — 対応不要 (probe)
-            Report the result or the validation error verbatim.
-            P6. Try the Bash tool with the command `echo main-bash`. Report the result or the denial text verbatim.
-            P7. Use the Agent tool to start the subagent pecot-w:w-reviewer. Tell it: "Try these three tools and report each result verbatim, then stop: (a) Read on probe/sample.py, (b) mcp__plugin_pecot-w_pecot-workflow__pr_show with pr_ref ${{ github.repository }}/${{ github.event.pull_request.number }}, (c) Bash with the command `echo sub-bash`." Report what the subagent returned.
+            /pecot-w:w-help Issue pecotcraft/pecot-sandbox/281 の状態を issue_show で読み、着手できるかを 3 行で答えてください。読めなかったら、エラーの文をそのまま書いてください。
           claude_args: >-
             --permission-mode default
             --max-turns ${{ vars.PECOT_REVIEW_MAX_TURNS || 60 }}
