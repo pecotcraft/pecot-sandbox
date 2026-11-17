@@ -16,7 +16,7 @@ jobs:
     name: ci-result
     runs-on: ubuntu-latest
     steps:
-      - run: echo ok
+      - run: '[ "$GITHUB_EVENT_NAME" != merge_group ]'
 
   version-plan:
     name: version-plan
