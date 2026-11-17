@@ -50,10 +50,10 @@ jobs:
             This run has no human (pecotcraft/pecot#567 verification). Follow w-revise Step 1 to Step 3 only, with these changes:
             - Post each inline finding with mcp__github_inline_comment__create_inline_comment (confirmed true) instead of gh api.
             - Post review-findings with mcp__plugin_pecot-w_pecot-workflow__issue_comment, passing the body as message.
-            - Start w-reviewer with the Agent tool and run_in_background false, and wait for its findings.
+            - In Step 2, do not start w-reviewer. Find its definition file agents/w-reviewer.md under ~/.claude/plugins/cache/pecot/pecot-w/ with Glob, Read it, and review the diff yourself from its viewpoints. Report whether the Glob and Read were allowed.
             - Do not ask the user anything. Stop after Step 3.
           claude_args: >-
             --permission-mode default
             --max-turns 60
-            --allowedTools "Read,Glob,Grep,Skill,Agent,mcp__plugin_pecot-w_pecot-workflow__pr_show,mcp__plugin_pecot-w_pecot-workflow__issue_show,mcp__plugin_pecot-w_pecot-workflow__pr_restack,mcp__plugin_pecot-w_pecot-workflow__issue_comment,mcp__github_inline_comment__create_inline_comment"
-            --disallowedTools "Bash,Edit,Write,NotebookEdit,AskUserQuestion,WebFetch,WebSearch"
+            --allowedTools "Read,Glob,Grep,Skill,mcp__plugin_pecot-w_pecot-workflow__pr_show,mcp__plugin_pecot-w_pecot-workflow__issue_show,mcp__plugin_pecot-w_pecot-workflow__pr_restack,mcp__plugin_pecot-w_pecot-workflow__issue_comment,mcp__github_inline_comment__create_inline_comment"
+            --disallowedTools "Bash,Edit,Write,NotebookEdit,AskUserQuestion,Agent,WebFetch,WebSearch"
