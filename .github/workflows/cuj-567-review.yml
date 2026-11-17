@@ -77,6 +77,8 @@ jobs:
         env:
           PECOT_GITHUB_COM_TOKEN: ${{ steps.token.outputs.token }}
         with:
+          # The action prefers the static token when it is set; removing the secret falls back to federation.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_federation_rule_id: ${{ vars.PECOT_AGENT_ANTHROPIC_FEDERATION_RULE_ID }}
           anthropic_organization_id: ${{ vars.PECOT_AGENT_ANTHROPIC_ORGANIZATION_ID }}
           anthropic_service_account_id: ${{ vars.PECOT_AGENT_ANTHROPIC_SERVICE_ACCOUNT_ID }}
