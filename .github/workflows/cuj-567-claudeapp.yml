@@ -50,6 +50,7 @@ jobs:
             This run has no human (pecotcraft/pecot#567 verification). Follow w-revise Step 1 to Step 3 only, with these changes:
             - Post each inline finding with mcp__github_inline_comment__create_inline_comment (confirmed true) instead of gh api.
             - Post review-findings with mcp__plugin_pecot-w_pecot-workflow__issue_comment, passing the body as message.
+            - Start w-reviewer with the Agent tool and run_in_background false, and wait for its findings.
             - Do not ask the user anything. Stop after Step 3.
           claude_args: >-
             --permission-mode default
