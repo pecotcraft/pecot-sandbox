@@ -91,7 +91,8 @@ jobs:
     steps:
       - name: Generate GitHub App token
         id: token
-        if: ${{ vars.PECOT_AGENT_APP_CLIENT_ID != '' }}
+        # cuj 594: skip the own App so that the Claude GitHub App path runs
+        if: ${{ false }}
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.PECOT_AGENT_APP_CLIENT_ID }}
@@ -171,6 +172,23 @@ jobs:
       # The dist-tag after the package name decides the version. @latest is the newest release,
       # and a new major version brings breaking changes. Use @<major> or @<version> to stay on one.
       # --prefix=/ keeps npx from stopping in a repository that declares pnpm devEngines.
+      - name: Probe review outputs (cuj 594)
+        if: ${{ always() }}
+        env:
+          OUTCOME: ${{ steps.claude.outcome }}
+          CONCLUSION: ${{ steps.claude.outputs.conclusion }}
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+          SKIPPED: ${{ steps.claude.outputs.skipped_due_to_workflow_validation_mismatch }}
+          T: ${{ steps.claude.outputs.github_token }}
+          HAS_TOKEN: ${{ steps.claude.outputs.github_token != '' }}
+        run: |
+          echo "outcome=[$OUTCOME]"
+          echo "conclusion=[$CONCLUSION]"
+          echo "execution_file=[$EXECUTION_FILE]"
+          echo "skipped_due_to_workflow_validation_mismatch=[$SKIPPED]"
+          if [ -n "$T" ]; then echo "github_token=set"; else echo "github_token=empty"; fi
+          echo "has_token_expr=[$HAS_TOKEN]"
+
       - name: Finish
         if: ${{ always() }}
         env:
