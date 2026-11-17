@@ -12,12 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  ci-result:
-    name: ci-result
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo ok
-
+  # pecotcraft/pecot#616 の調査: ci-result の job を外し、必須のチェックが満たされない状態を作る。
   version-plan:
     name: version-plan
     runs-on: ubuntu-latest
