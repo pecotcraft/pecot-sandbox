@@ -1,0 +1,77 @@
+name: cuj-567 pecotbot probe
+
+# Probe for #567: re-review by "@pecotbot review". Lives on pecot-sandbox main only while probing.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    if: |-
+      ${{
+        vars.PECOT_AGENT_APP_CLIENT_ID != '' &&
+        github.event.issue.pull_request &&
+        github.event.comment.user.type != 'Bot' &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+        (
+          github.event.comment.body == (vars.PECOT_REVIEW_TRIGGER_PHRASE || '@pecotbot review') ||
+          startsWith(github.event.comment.body, format('{0} ', vars.PECOT_REVIEW_TRIGGER_PHRASE || '@pecotbot review')) ||
+          startsWith(github.event.comment.body, format('{0}
+      ', vars.PECOT_REVIEW_TRIGGER_PHRASE || '@pecotbot review'))
+        )
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    concurrency:
+      group: pecot-review-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    steps:
+      - name: Issue token
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.PECOT_AGENT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.PECOT_AGENT_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+          permission-contents: read
+
+      - name: Check PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          read -r head draft state sha < <(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq '[.head.repo.full_name, .draft, .state, .head.sha] | @tsv')
+          ok=false
+          if [ "$head" = "$GITHUB_REPOSITORY" ] && [ "$draft" = false ] && [ "$state" = open ]; then ok=true; fi
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "- head: $head / draft: $draft / state: $state / sha: $sha / ok: $ok" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Acknowledge
+        if: steps.pr.outputs.ok == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_ID/reactions" -f content=eyes --jq '"- reaction: \(.content) by \(.user.login)"' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout
+        if: steps.pr.outputs.ok == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Read head
+        if: steps.pr.outputs.ok == 'true'
+        run: |
+          echo "- probe file first line: $(head -1 probe/sample.py)" >> "$GITHUB_STEP_SUMMARY"
