@@ -1,0 +1,21 @@
+name: forge-status
+
+# pecotcraft/pecot#616 の調査: GITHUB_TOKEN で付けた status が必須のチェックを満たすかを見る。
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  statuses: write
+
+jobs:
+  forge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post ci-result status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh api -X POST "repos/$REPO/statuses/$SHA" -f state=success -f context=ci-result -f description="investigation (GITHUB_TOKEN)"
