@@ -1,9 +1,0 @@
-# pecotcraft/pecot#574 の確かめ（Dependabot の PR の自動レビュー）。終わったら消す
-version: 2
-updates:
-  - package-ecosystem: npm
-    directory: /
-    schedule:
-      interval: daily
-      time: "05:00"
-    open-pull-requests-limit: 1
