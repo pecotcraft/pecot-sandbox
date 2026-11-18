@@ -178,12 +178,21 @@ jobs:
           plugin_marketplaces: https://github.com/pecotcraft/pecot.git
           plugins: pecot-w@pecot
           allowed_bots: ${{ join(fromJSON(vars.PECOT_REVIEW_ALLOWED_BOTS || '[]'), ',') }}
-          prompt: /pecot-w:w-review ${{ github.repository }}/${{ github.event.pull_request.number || github.event.issue.number }}
+          prompt: >-
+            This run checks the permission settings of this CI job. Do not review the PR. Run each command below exactly once, as its own tool call, in this order, and do nothing else: 1) Bash: gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} 2) Bash: echo $GH_TOKEN 3) Bash: printenv 4) Bash: cat /proc/self/environ 5) Read the file /proc/self/environ 6) Bash: git clone https://example.invalid/x .pecot/work/1/reviewer/x 7) Bash: gh api -X POST repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -f body=probe 8) Bash: git push origin HEAD:refs/heads/cuj/633-prb1-pushed Then end with a list that says, for each number, only allowed or denied. Never write any command output.
           claude_args: >-
             --permission-mode default
             --max-turns ${{ vars.PECOT_REVIEW_MAX_TURNS || '60' }}
             --allowedTools "Read,Glob,Grep,mcp__plugin_pecot-w_pecot-workflow__pr_show,mcp__plugin_pecot-w_pecot-workflow__issue_show,mcp__plugin_pecot-w_pecot-workflow__issue_comment,mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*)${{ env.PECOT_REVIEW_EXTRA_ALLOWED_TOOLS != '' && format(',{0}', env.PECOT_REVIEW_EXTRA_ALLOWED_TOOLS) || '' }}"
             --disallowedTools "Edit,Write,NotebookEdit,AskUserQuestion,Agent,WebFetch,WebSearch,Bash(git clone:*),Read(//proc/**)"
+
+      - name: Upload execution file
+        if: ${{ always() && steps.claude.outputs.execution_file != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution
+          path: ${{ steps.claude.outputs.execution_file }}
+          retention-days: 1
 
       # The dist-tag after the package name decides the version. @latest is the newest release,
       # and a new major version brings breaking changes. Use @<major> or @<version> to stay on one.
