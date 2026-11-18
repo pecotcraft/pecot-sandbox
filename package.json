@@ -2,7 +2,7 @@
   "name": "pecot-sandbox-cuj574",
   "private": true,
   "dependencies": {
-    "is-number": "6.0.0",
+    "is-number": "7.0.0",
     "left-pad": "1.0.0"
   }
 }
