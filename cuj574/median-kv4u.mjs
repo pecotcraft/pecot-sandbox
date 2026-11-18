@@ -12,3 +12,4 @@ export function median(values) {
   }
   return sorted[middle]
 }
+// note
