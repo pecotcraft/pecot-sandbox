@@ -1,4 +1,4 @@
-# pecot-workflow-template: review 4
+# pecot-workflow-template: review 5
 #
 # Place this file at .github/workflows/pecot-review.yml in your repository.
 #
@@ -37,6 +37,9 @@
 #     Write it as a JSON array, for example ["my-app[bot]"].
 #   PECOT_REVIEW_MAX_TURNS limits the turns of the main agent. The default is 60.
 #   PECOT_REVIEW_TIMEOUT_MINUTES limits the job time in minutes. The default is 30.
+#   PECOT_REVIEW_PROJECT names the pecot project config to use. The default is unset.
+#     Set it when the repository is in two or more configs under .pecot/config/projects.
+#     Write the file name without .json.
 #   PECOT_REVIEW_WEB_ACCESS set to "false" stops Context7, WebSearch, and WebFetch. The default is "true".
 # Optional secret CONTEXT7_API_KEY raises the Context7 rate limit. Without it, Context7 runs without a key.
 #
@@ -196,7 +199,7 @@ jobs:
           plugin_marketplaces: https://github.com/pecotcraft/pecot.git
           plugins: pecot-w@pecot
           allowed_bots: ${{ join(fromJSON(vars.PECOT_REVIEW_ALLOWED_BOTS || '[]'), ',') }}
-          prompt: /pecot-w:w-review ${{ github.repository }}/${{ github.event.pull_request.number || github.event.issue.number }}
+          prompt: /pecot-w:w-review ${{ github.repository }}/${{ github.event.pull_request.number || github.event.issue.number }}${{ vars.PECOT_REVIEW_PROJECT != '' && format(' project={0}', vars.PECOT_REVIEW_PROJECT) || '' }}
           claude_args: >-
             --permission-mode default
             --max-turns ${{ vars.PECOT_REVIEW_MAX_TURNS || '60' }}
