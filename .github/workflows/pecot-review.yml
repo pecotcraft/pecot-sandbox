@@ -1,6 +1,6 @@
 # pecot-workflow-template: review 3
 #
-# Place this file at .github/workflows/pecot-review.yml in your repository. (cuj 639)
+# Place this file at .github/workflows/pecot-review.yml in your repository.
 #
 # This workflow runs the pecot w-review skill on a pull request with claude-code-action.
 # It posts inline comments and a list of findings. It never pushes, merges, or closes.
