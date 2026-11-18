@@ -1,5 +1,5 @@
 # pecot-workflow-template: review 2
-#
+# cuj 574 scenario 20
 # Place this file at .github/workflows/pecot-review.yml in your repository.
 #
 # This workflow runs the pecot w-review skill on a pull request with claude-code-action.
