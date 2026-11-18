@@ -2,8 +2,7 @@
 
 
 def mean(values):
-    """数の列の中央値を返す。"""
-    unused = len(values) * 2
+    """数の列の平均値を返す。"""
     return sum(values) / len(values)
 
 
