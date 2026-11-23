@@ -3,4 +3,6 @@ def mean(values):
     total = 0
     for v in values:
         total += v
+    if len(values) == 0:
+        return 0
     return total / len(values)
