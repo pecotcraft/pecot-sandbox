@@ -272,7 +272,7 @@ jobs:
                 | if length == 0 then "None."
                   else ("| Tool | Target |", "|---|---|",
                     (.[] | "| \(.tool_name | cell) | \(.tool_input | target | cell) |")) end)
-          ' "$EXECUTION_FILE" >> "$GITHUB_STEP_SUMMARY"
+          ' "$EXECUTION_FILE" | tee -a "$GITHUB_STEP_SUMMARY"
 
       # The dist-tag after the package name decides the version. @latest is the newest release,
       # and a new major version brings breaking changes. Use @<major> or @<version> to stay on one.
