@@ -51,8 +51,11 @@
 #
 # The job summary of each run shows the model and the effort level that were used.
 # It also lists the tools that were called and the calls that were denied.
-# It shows paths, commands, and queries cut to 200 characters, never tool output.
-# A command, even a denied one, can carry text that Claude wrote.
+# For each call it shows one input field cut to 200 characters, never tool output.
+# The field is the first one found in this order: path, command, pattern, URL.
+# Then it looks for a query or a reference.
+# A call with none of these shows only the names of its input fields.
+# Any of these inputs, even in a denied call, can carry text that Claude wrote.
 #
 # Runs started by Dependabot read Dependabot secrets, not Actions secrets.
 # To review Dependabot PRs, add "dependabot[bot]" to PECOT_REVIEW_ALLOWED_BOTS.
