@@ -1,0 +1,14 @@
+name: cuj-712-fail
+# 一時のワークフロー（pecotcraft/pecot#712 の確かめ）。落ちる CI の run を作る。確かめが終われば消す
+on:
+  push:
+    branches: ['cuj/712-wzpa/**']
+
+permissions:
+  contents: read
+
+jobs:
+  fail:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
