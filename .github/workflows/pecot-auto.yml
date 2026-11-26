@@ -218,7 +218,7 @@ jobs:
                 | if length == 0 then "None."
                   else ("| Tool | Target |", "|---|---|",
                     (.[] | "| \(.tool_name | cell) | \(.tool_input | target | cell) |")) end)
-          ' "$EXECUTION_FILE" >> "$GITHUB_STEP_SUMMARY"
+          ' "$EXECUTION_FILE" | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Writes the result comment when the skill did not, for example on a time-out.
       - name: Finish
