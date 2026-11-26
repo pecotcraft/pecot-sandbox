@@ -1,0 +1,18 @@
+# pecotcraft/pecot#789 の確かめで一時的に置く。GITHUB_TOKEN の vulnerability-alerts の権限を試す。
+name: pecot cuj 789 perm
+on:
+  workflow_dispatch:
+permissions:
+  vulnerability-alerts: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: dependabot alerts / github_token
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          status=$(gh api -i "repos/$REPO/dependabot/alerts?per_page=1" 2>/dev/null | head -1 | awk '{print $2}')
+          echo "PECOT_RESULT {\"operation\":\"vulnerability-alerts\",\"token\":\"github_token\",\"status\":${status:-0}}"
