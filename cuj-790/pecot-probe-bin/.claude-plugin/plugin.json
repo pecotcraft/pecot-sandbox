@@ -1,0 +1,8 @@
+{
+  "name": "pecot-probe-bin",
+  "version": "0.1.0",
+  "description": "スキル 1 つと直下の bin/ を持つ試しのプラグイン（pecotcraft/pecot#790）",
+  "author": {
+    "name": "pecot"
+  }
+}
