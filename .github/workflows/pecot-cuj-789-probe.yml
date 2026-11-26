@@ -97,7 +97,9 @@ jobs:
                 head=$(printf '{"alg":"RS256","typ":"JWT"}' | b64)
                 payload=$(printf '{"iat":%d,"exp":%d,"iss":"%s"}' $((now-60)) $((now+300)) "$APP_CLIENT_ID" | b64)
                 sig=$(printf '%s.%s' "$head" "$payload" | openssl dgst -sha256 -sign "$key" | b64); rm -f "$key"
-                GH_TOKEN="$head.$payload.$sig" call installations /app/installations --jq "[.[] | select(.account.login==\"$owner\") | {id, permissions, repository_selection}]"
+                body=$(curl -sS -H "Authorization: Bearer $head.$payload.$sig" -H "Accept: application/vnd.github+json" https://api.github.com/app/installations | jq -c --arg o "$owner" '[.[]? | select(.account.login==$o) | {id, permissions, repository_selection}]' 2>&1)
+                jq -e . >/dev/null 2>&1 <<<"$body" || body=$(jq -Rs . <<<"$body")
+                results=$(jq -c --argjson b "$body" '[{label: "installations", status: 200, body: $b}]' <<<'[]')
               fi ;;
             repo-settings)
               call repo "repos/$REPO"
