@@ -101,8 +101,6 @@ jobs:
           permission-organization-projects: write
           permission-contents: read
           permission-pull-requests: read
-          # Temporary for the check of pecotcraft/pecot#714. The App has no Commit statuses permission.
-          permission-statuses: read
 
       # The dist-tag after the package name decides the version. @latest is the newest release,
       # and a new major version brings breaking changes. Use @<major> or @<version> to stay on one.
