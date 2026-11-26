@@ -144,7 +144,7 @@ jobs:
             tracker-sync)
               export PECOT_GITHUB_COM_TOKEN=$GH_TOKEN
               for k in security dependabot; do
-                out=$(npx -y @pecot/workflow-mcp@9.0.0 tracker sync "$k" --json 2>&1); code=$?
+                out=$(npx -y @pecot/workflow-mcp@9.0.0 tracker sync "$k" 2>&1); code=$?
                 results=$(jq -c --arg l "tracker-$k" --argjson c "$code" --arg o "$(tail -c 3000 <<<"$out")" '. + [{label: $l, status: $c, body: $o}]' <<<"$results")
               done ;;
             *) results='[{"label":"unknown operation","status":0}]' ;;
