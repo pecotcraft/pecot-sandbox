@@ -161,9 +161,7 @@ jobs:
           PR: ${{ github.event.issue.number }}
           COMMENTER: ${{ github.event.comment.user.login }}
           COMMENT_AT: ${{ github.event.comment.created_at }}
-          ASSOC: ${{ github.event.comment.author_association }}
         run: |
-          echo "author_association=$ASSOC"
           pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR")
           permission=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$COMMENTER/permission" --jq .permission)
           head=$(jq -r '.head.repo.full_name // ""' <<< "$pr")
