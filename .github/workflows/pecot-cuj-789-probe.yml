@@ -1,0 +1,174 @@
+# pecotcraft/pecot#789 の確かめで一時的に置く。確かめが済んだら消す。
+name: pecot cuj 789 probe
+run-name: probe ${{ inputs.operation }} ${{ inputs.request_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "app-info / repo-settings / secrets-variables / stack-register / merge-async / project-fields / project-link / release-create / link-branch / create-pr / tracker-sync"
+        required: true
+        type: string
+      request_id:
+        required: true
+        type: string
+      targets:
+        description: 'JSON keyed by token name (github_token / board_app / agent_app), e.g. {"board_app":{"pr":12}}'
+        required: false
+        default: "{}"
+        type: string
+      tokens:
+        description: "Comma-separated token names to try"
+        required: false
+        default: "github_token,board_app,agent_app"
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  security-events: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPERATION: ${{ inputs.operation }}
+      TARGETS: ${{ inputs.targets }}
+      TOKENS: ${{ inputs.tokens }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Board sync app token
+        id: board-app
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.PECOT_BOARD_SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.PECOT_BOARD_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Agent app token
+        id: agent-app
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.PECOT_AGENT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.PECOT_AGENT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Write the probe script
+        run: |
+          cat > "$RUNNER_TEMP/probe.sh" <<'EOF'
+          #!/usr/bin/env bash
+          # usage: probe.sh <token name>. GH_TOKEN holds the token.
+          set -uo pipefail
+          name=$1
+          case ",$TOKENS," in *",$name,"*) ;; *) echo "skip $name"; exit 0 ;; esac
+          t=$(jq -c --arg n "$name" '.[$n] // {}' <<<"$TARGETS")
+          owner=${REPO%%/*}
+          v() { jq -r --arg k "$1" '.[$k] // empty' <<<"$t"; }
+          results='[]'
+          # call <label> <gh api args...>: records HTTP status and the body (or its message)
+          call() {
+            local label=$1; shift
+            local out status body
+            out=$(gh api -i "$@" 2>/dev/null); status=$(head -1 <<<"$out" | awk '{print $2}')
+            body=$(sed '1,/^\r\{0,1\}$/d' <<<"$out")
+            jq -e . >/dev/null 2>&1 <<<"$body" || body=$(jq -Rs . <<<"$body")
+            results=$(jq -c --arg l "$label" --arg s "${status:-0}" --argjson b "$body" '. + [{label: $l, status: ($s|tonumber), body: $b}]' <<<"$results")
+            LAST=$body
+          }
+          # GraphQL returns 200 with errors; record those as status 0
+          gql() {
+            local label=$1; shift; call "$label" graphql "$@"
+            if jq -e 'type=="object" and has("errors")' >/dev/null 2>&1 <<<"$LAST"; then results=$(jq -c '.[-1].status = 0' <<<"$results"); fi
+          }
+          b64() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+          project_id() { gh api graphql -f query='query($o:String!,$n:Int!){organization(login:$o){projectV2(number:$n){id}}}' -f o="$owner" -F n="$(v project_number)" --jq '.data.organization.projectV2.id' 2>/dev/null; }
+          case "$OPERATION" in
+            app-info)
+              if [ -z "${APP_CLIENT_ID:-}" ]; then results='[{"label":"not an app","status":200}]'; else
+                now=$(date +%s); key=$(mktemp); printf '%s' "$APP_KEY" > "$key"
+                head=$(printf '{"alg":"RS256","typ":"JWT"}' | b64)
+                payload=$(printf '{"iat":%d,"exp":%d,"iss":"%s"}' $((now-60)) $((now+300)) "$APP_CLIENT_ID" | b64)
+                sig=$(printf '%s.%s' "$head" "$payload" | openssl dgst -sha256 -sign "$key" | b64); rm -f "$key"
+                GH_TOKEN="$head.$payload.$sig" call installations /app/installations --jq "[.[] | select(.account.login==\"$owner\") | {id, permissions, repository_selection}]"
+              fi ;;
+            repo-settings)
+              call repo "repos/$REPO"
+              LAST=$(jq -c '{has_delete_branch_on_merge: has("delete_branch_on_merge"), delete_branch_on_merge, owner_type: .owner.type}' <<<"$LAST")
+              results=$(jq -c --argjson x "$LAST" '.[-1].body = $x' <<<"$results") ;;
+            secrets-variables)
+              call secrets "repos/$REPO/actions/secrets" --jq '{names: [.secrets[].name]}'
+              call variables "repos/$REPO/actions/variables" --jq '{names: [.variables[].name]}'
+              call dependabot-alerts "repos/$REPO/dependabot/alerts?per_page=1" --jq 'length'
+              call code-scanning-alerts "repos/$REPO/code-scanning/alerts?per_page=1" --jq 'length' ;;
+            stack-register)
+              call stacks-list "repos/$REPO/stacks?pull_request=$(v parent_pr)" -H 'X-GitHub-Api-Version: 2026-03-10'
+              call stacks-create "repos/$REPO/stacks" -X POST -H 'X-GitHub-Api-Version: 2026-03-10' --input <(jq -c '{pull_requests: [.parent_pr, .child_pr]}' <<<"$t") ;;
+            merge-async)
+              sha=$(gh api "repos/$REPO/pulls/$(v pr)" --jq .head.sha 2>/dev/null)
+              call merge-async "repos/$REPO/pulls/$(v pr)/merge-async" -X PUT -H 'X-GitHub-Api-Version: 2026-03-10' -f sha="$sha" ;;
+            project-fields)
+              pid=$(project_id)
+              gql create-single-select -f query='mutation($p:ID!,$n:String!){createProjectV2Field(input:{projectId:$p,dataType:SINGLE_SELECT,name:$n,singleSelectOptions:[{name:"A",color:GRAY,description:""}]}){projectV2Field{... on ProjectV2SingleSelectField{id name}}}}' -f p="$pid" -f n="cuj-sel-$name"
+              fid=$(jq -r '.data.createProjectV2Field.projectV2Field.id // empty' <<<"$LAST")
+              gql rename -f query='mutation($f:ID!,$n:String!){updateProjectV2Field(input:{fieldId:$f,name:$n}){projectV2Field{... on ProjectV2SingleSelectField{id name}}}}' -f f="$fid" -f n="cuj-sel2-$name"
+              gql options -f query='mutation($f:ID!){updateProjectV2Field(input:{fieldId:$f,singleSelectOptions:[{name:"A",color:GRAY,description:""},{name:"B",color:BLUE,description:""}]}){projectV2Field{... on ProjectV2SingleSelectField{id options{name}}}}}' -f f="$fid"
+              gql delete -f query='mutation($f:ID!){deleteProjectV2Field(input:{fieldId:$f}){projectV2Field{... on ProjectV2FieldCommon{id name}}}}' -f f="$fid"
+              gql create-date -f query='mutation($p:ID!,$n:String!){createProjectV2Field(input:{projectId:$p,dataType:DATE,name:$n}){projectV2Field{... on ProjectV2Field{id name dataType}}}}' -f p="$pid" -f n="cuj-date-$name" ;;
+            project-link)
+              pid=$(project_id)
+              rid=$(gh api "repos/$REPO" --jq .node_id 2>/dev/null)
+              gql link -f query='mutation($p:ID!,$r:ID!){linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){repository{nameWithOwner}}}' -f p="$pid" -f r="$rid"
+              gql unlink -f query='mutation($p:ID!,$r:ID!){unlinkProjectV2FromRepository(input:{projectId:$p,repositoryId:$r}){repository{nameWithOwner}}}' -f p="$pid" -f r="$rid" ;;
+            release-create)
+              call release "repos/$REPO/releases" -X POST -f tag_name="$(v tag)" -f target_commitish=main -f name="$(v tag)" -f make_latest=false --jq '{id, tag_name, html_url}' ;;
+            link-branch)
+              iid=$(gh api "repos/$REPO/issues/$(v issue)" --jq .node_id 2>/dev/null)
+              oid=$(gh api "repos/$REPO/git/ref/heads/main" --jq .object.sha 2>/dev/null)
+              rid=$(gh api "repos/$REPO" --jq .node_id 2>/dev/null)
+              gql link-branch -f query='mutation($i:ID!,$o:GitObjectID!,$n:String!,$r:ID!){createLinkedBranch(input:{issueId:$i,oid:$o,name:$n,repositoryId:$r}){linkedBranch{ref{name}}}}' -f i="$iid" -f o="$oid" -f n="$(v branch)" -f r="$rid" ;;
+            create-pr)
+              call create-pr "repos/$REPO/pulls" -X POST -f head="$(v head)" -f base=main -f title="$(v title)" -f body="$(v body)" -F draft=true --jq '{number, html_url, user: .user.login}' ;;
+            tracker-sync)
+              export PECOT_GITHUB_COM_TOKEN=$GH_TOKEN
+              for k in security dependabot; do
+                out=$(npx -y @pecot/workflow-mcp@9.0.0 tracker sync "$k" --json 2>&1); code=$?
+                results=$(jq -c --arg l "tracker-$k" --argjson c "$code" --arg o "$(tail -c 3000 <<<"$out")" '. + [{label: $l, status: $c, body: $o}]' <<<"$results")
+              done ;;
+            *) results='[{"label":"unknown operation","status":0}]' ;;
+          esac
+          line=$(jq -c --arg op "$OPERATION" --arg n "$name" '{operation: $op, token: $n, calls: .}' <<<"$results")
+          echo "PECOT_RESULT $line"
+          { echo "### $OPERATION / $name"; echo '```json'; jq . <<<"$line"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          jq -e 'all(.[]; .status >= 200 and .status < 300)' >/dev/null <<<"$results"
+          EOF
+          chmod +x "$RUNNER_TEMP/probe.sh"
+
+      - name: ${{ inputs.operation }} / github_token
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: '"$RUNNER_TEMP/probe.sh" github_token'
+
+      - name: ${{ inputs.operation }} / board_app
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.board-app.outputs.token }}
+          APP_CLIENT_ID: ${{ vars.PECOT_BOARD_SYNC_APP_CLIENT_ID }}
+          APP_KEY: ${{ secrets.PECOT_BOARD_SYNC_APP_PRIVATE_KEY }}
+        run: '"$RUNNER_TEMP/probe.sh" board_app'
+
+      - name: ${{ inputs.operation }} / agent_app
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.agent-app.outputs.token }}
+          APP_CLIENT_ID: ${{ vars.PECOT_AGENT_APP_CLIENT_ID }}
+          APP_KEY: ${{ secrets.PECOT_AGENT_APP_PRIVATE_KEY }}
+        run: '"$RUNNER_TEMP/probe.sh" agent_app'
