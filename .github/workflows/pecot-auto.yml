@@ -20,8 +20,8 @@
 # Then set these in Settings > Secrets and variables > Actions.
 #   Variable PECOT_AGENT_APP_CLIENT_ID, the client ID of the App.
 #   Secret PECOT_AGENT_APP_PRIVATE_KEY, a private key of the App.
-# While the variable is empty or the App token cannot be made,
-# the setup job only comments on the issue with what is missing.
+# When the variable is empty or the App token cannot be made, the gate job stops.
+# Then the setup job only comments on the issue with what is missing.
 # Set one model credential too.
 #   Claude subscription (default).
 #     Set secret CLAUDE_CODE_OAUTH_TOKEN, made with `claude setup-token`.
