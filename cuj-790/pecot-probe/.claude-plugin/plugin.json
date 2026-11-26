@@ -1,0 +1,8 @@
+{
+  "name": "pecot-probe",
+  "version": "0.1.0",
+  "description": "スキルを 1 つだけ持ち、bin/ を持たない試しのプラグイン（pecotcraft/pecot#790）",
+  "author": {
+    "name": "pecot"
+  }
+}

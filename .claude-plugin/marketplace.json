@@ -1,0 +1,21 @@
+{
+  "name": "pecot-probe",
+  "owner": {
+    "name": "pecot"
+  },
+  "metadata": {
+    "description": "pecotcraft/pecot#790 の確かめ用の試しの marketplace"
+  },
+  "plugins": [
+    {
+      "name": "pecot-probe",
+      "source": "./cuj-790/pecot-probe",
+      "description": "スキルを 1 つだけ持ち、bin/ を持たない試しのプラグイン"
+    },
+    {
+      "name": "pecot-probe-bin",
+      "source": "./cuj-790/pecot-probe-bin",
+      "description": "スキル 1 つと直下の bin/ を持つ試しのプラグイン"
+    }
+  ]
+}
