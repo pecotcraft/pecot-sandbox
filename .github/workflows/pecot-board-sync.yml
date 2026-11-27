@@ -2,6 +2,7 @@
 #
 # Place this file at .github/workflows/pecot-board-sync.yml in your repository.
 # `workflow_install` (name: board-sync) places it and pins the pecot actions to a commit SHA.
+# [cuj 885-q4m9] この行は CI の待ちの間のコンフリクトを作るために書き換えた。
 #
 # This workflow runs the pecot board-sync action after PRs and issues change.
 # The action fixes the Status column and label of the pecot project board.
