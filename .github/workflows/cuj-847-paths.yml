@@ -1,0 +1,21 @@
+name: cuj-847-paths
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - "libs/interface-spec/docs/**"
+      - "libs/interface-spec/targets.json"
+      - "libs/interface-spec/project.json"
+      - "plugins/*/interface/**"
+      - "actions/interface/**"
+      - ".github/assets/**"
+      - ".github/workflows/pages-build.yml"
+      - ".githooks/ci/dev-container.sh"
+      - ".devcontainer/**"
+      - "nx.json"
+permissions: {}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo probe
