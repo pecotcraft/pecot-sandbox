@@ -281,19 +281,9 @@ jobs:
                     (.[] | "| \(.tool_name | cell) | \(.tool_input | target | cell) |")) end)
           ' "$EXECUTION_FILE" >> "$GITHUB_STEP_SUMMARY"
 
-      # このリポだけの step。PR の head の action を App の token で動かさないよう、既定のブランチの actions/ を別のパスに置く
-      - name: Check out the pecot actions
-        if: ${{ always() && steps.first.outputs.ok != 'false' }}
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-          path: .pecot-actions
-          sparse-checkout: actions
-          persist-credentials: false
-
       - name: Finish
         if: ${{ always() && steps.first.outputs.ok != 'false' }}
-        uses: ./.pecot-actions/actions/review-finish
+        uses: pecotcraft/pecot/actions/review-finish@main
         env:
           PECOT_REVIEW_TRIGGER_PHRASE: ${{ vars.PECOT_REVIEW_TRIGGER_PHRASE }}
         with:
