@@ -104,7 +104,7 @@ jobs:
       - name: Decide
         id: decide
         if: ${{ steps.token.outcome == 'success' }}
-        uses: pecotcraft/pecot/actions/auto-gate@feat/actions-project-split/792
+        uses: pecotcraft/pecot/actions/auto-gate@main
         env:
           PECOT_AUTO_LABEL: ${{ vars.PECOT_AUTO_LABEL || 'pecot-auto' }}
         with:
@@ -158,7 +158,7 @@ jobs:
       # Writes the context of the issue to a file under RUNNER_TEMP for the skill.
       - name: Start
         id: start
-        uses: pecotcraft/pecot/actions/auto-start@feat/actions-project-split/792
+        uses: pecotcraft/pecot/actions/auto-start@main
         with:
           token: ${{ steps.token.outputs.token }}
           issue: ${{ needs.gate.outputs.issue }}
@@ -167,18 +167,6 @@ jobs:
       # pecot-auto:prepare:begin
       # Add steps that the fix and the tests need, such as installing dependencies.
       # pecot-auto:prepare:end
-
-      # #792 の CUJ だけ: w-auto を作業ブランチの pecot-w で動かす。
-      - name: Check out the pecot plugin under test
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: pecotcraft/pecot
-          ref: feat/actions-project-split/792
-          path: pecot-src
-          persist-credentials: false
-
-      - name: Keep the plugin out of git status
-        run: echo "/pecot-src/" >> .git/info/exclude
 
       - name: Fix
         id: claude
@@ -194,7 +182,7 @@ jobs:
           anthropic_service_account_id: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && vars.PECOT_AGENT_ANTHROPIC_SERVICE_ACCOUNT_ID || '' }}
           anthropic_workspace_id: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN == '' && vars.PECOT_AGENT_ANTHROPIC_WORKSPACE_ID || '' }}
           github_token: ${{ steps.token.outputs.token }}
-          plugin_marketplaces: ./pecot-src
+          plugin_marketplaces: https://github.com/pecotcraft/pecot.git
           plugins: pecot-w@pecot
           # Pushes made with the App token come back as runs started by the App.
           allowed_bots: ${{ steps.token.outputs.app-slug }}
@@ -210,7 +198,7 @@ jobs:
       # Writes the result comment from the result file of the skill, or from how the job ended.
       - name: Finish
         if: ${{ always() }}
-        uses: pecotcraft/pecot/actions/auto-finish@feat/actions-project-split/792
+        uses: pecotcraft/pecot/actions/auto-finish@main
         env:
           PECOT_AUTO_LABEL: ${{ vars.PECOT_AUTO_LABEL || 'pecot-auto' }}
         with:
@@ -284,7 +272,7 @@ jobs:
 
       - name: Report
         if: ${{ steps.check.outputs.ok == 'true' }}
-        uses: pecotcraft/pecot/actions/auto-finish@feat/actions-project-split/792
+        uses: pecotcraft/pecot/actions/auto-finish@main
         env:
           PECOT_AUTO_LABEL: ${{ vars.PECOT_AUTO_LABEL || 'pecot-auto' }}
         with:
