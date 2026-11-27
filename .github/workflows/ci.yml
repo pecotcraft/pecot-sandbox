@@ -23,3 +23,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo ok
+
+  slow:
+    name: slow
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 300
+
+  broken:
+    name: broken
+    runs-on: ubuntu-latest
+    steps:
+      - run: test -f cuj/885-f5n1.ok
