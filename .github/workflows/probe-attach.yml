@@ -1,0 +1,19 @@
+name: probe-attach
+on:
+  push:
+    branches: [claude/project-thread-t5a2yz]
+    paths: [.github/workflows/probe-attach.yml]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh --version
+      - name: attach with GITHUB_TOKEN
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment 758 -R "$GITHUB_REPOSITORY" --body 'GITHUB_TOKEN で --attach の確かめ ![probe](./probe.png)' --attach probe/probe.png
