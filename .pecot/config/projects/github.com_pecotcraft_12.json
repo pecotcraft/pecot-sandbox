@@ -1,0 +1,32 @@
+{
+  "host": "github.com",
+  "owner": "pecotcraft",
+  "project": {
+    "number": 12,
+    "id": "PVT_kwDOFO6i_s4Btint",
+    "board_url": "https://github.com/orgs/pecotcraft/projects/12/views/1?layout=board&verticalGroupedBy%5BcolumnId%5D=451650453&filterQuery=%20pecot-status%3APending%2CBacklog%2CBlocked%2CReady%2CActive%2CArchived%2C%22In%20Review%22",
+    "fields": {
+      "workflow": {
+        "id": "PVTSSF_lADOFO6i_s4Btintzhrro5U",
+        "options": {
+          "backlog": "cfde7624",
+          "pending": "c1047678",
+          "blocked": "1b70633a",
+          "ready": "3af14ae2",
+          "active": "272989c8",
+          "in_review": "f1791c33",
+          "archived": "b46b46e9"
+        }
+      },
+      "status": {
+        "id": "PVTSSF_lADOFO6i_s4BtintzhrropM",
+        "options": {
+          "todo": "f75ad846",
+          "in_progress": "47fc9ee4",
+          "needs_attention": "d551e2a7"
+        }
+      }
+    }
+  },
+  "repositories": []
+}
